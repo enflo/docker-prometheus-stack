@@ -64,8 +64,6 @@ services:
     networks:
       - back-tier
     restart: always
-    deploy:
-      mode: global
 
   alertmanager:
     image: prom/alertmanager
@@ -92,8 +90,6 @@ services:
     networks:
       - back-tier
     restart: always
-    deploy:
-      mode: global
 
   mysqld_exporter:
     image: prom/mysqld-exporter
@@ -107,5 +103,3 @@ services:
     command: ["-web.listen-address=:9104", "-collect.global_status=true", "-collect.global_variables=false", "-collect.slave_status=false", "-collect.info_schema.tables=false", "-collect.binlog_size=false", "-collect.info_schema.processlist=false", "-collect.info_schema.userstats=false", "-collect.info_schema.tables=false", "-collect.auto_increment.columns=false", "-collect.info_schema.tablestats=false", "-collect.perf_schema.file_events=false", "-collect.perf_schema.eventsstatements=false", "-collect.perf_schema.indexiowaits=false", "-collect.perf_schema.tableiowaits=false", "-collect.perf_schema.tablelocks=false", "-collect.perf_schema.eventswaits=false"]
     labels:
       - "mon.percona.container_type=collector"
-    depends_on:
-      - mysql
