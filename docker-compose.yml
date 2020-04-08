@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3'
 
 volumes:
     prometheus_data: {}
@@ -9,6 +9,23 @@ networks:
   back-tier:
 
 services:
+
+  grafana:
+    image: grafana/grafana
+    user: "104"
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ./grafana/config.monitoring
+    networks:
+      - back-tier
+      - front-tier
+    restart: always
 
   prometheus:
     image: prom/prometheus:v2.17.1
@@ -30,10 +47,6 @@ services:
     networks:
       - back-tier
     restart: always
-#    deploy:
-#      placement:
-#        constraints:
-#          - node.hostname == ${HOSTNAME}
 
   node-exporter:
     image: prom/node-exporter
@@ -66,10 +79,7 @@ services:
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
-#    deploy:
-#      placement:
-#        constraints:
-#          - node.hostname == ${HOSTNAME}
+
   cadvisor:
     image: google/cadvisor
     volumes:
@@ -85,19 +95,17 @@ services:
     deploy:
       mode: global
 
-  grafana:
-    image: grafana/grafana
-    user: "104"
-    depends_on:
-      - prometheus
+  mysqld_exporter_high_res:
+    image: prom/mysqld-exporter
+    container_name: mysql-exporter
+    environment:
+      - DATA_SOURCE_NAME=prometheus:prometheus@(mysql:3306)/
     ports:
-      - 3000:3000
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning/:/etc/grafana/provisioning/
-    env_file:
-      - ./grafana/config.monitoring
+      - "9104:9104"
     networks:
       - back-tier
-      - front-tier
-    restart: always
+    command: ["-web.listen-address=:9104", "-collect.global_status=true", "-collect.global_variables=false", "-collect.slave_status=false", "-collect.info_schema.tables=false", "-collect.binlog_size=false", "-collect.info_schema.processlist=false", "-collect.info_schema.userstats=false", "-collect.info_schema.tables=false", "-collect.auto_increment.columns=false", "-collect.info_schema.tablestats=false", "-collect.perf_schema.file_events=false", "-collect.perf_schema.eventsstatements=false", "-collect.perf_schema.indexiowaits=false", "-collect.perf_schema.tableiowaits=false", "-collect.perf_schema.tablelocks=false", "-collect.perf_schema.eventswaits=false"]
+    labels:
+      - "mon.percona.container_type=collector"
+    depends_on:
+      - mysqld
