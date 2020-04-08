@@ -95,7 +95,7 @@ services:
     deploy:
       mode: global
 
-  mysqld_exporter_high_res:
+  mysqld_exporter:
     image: prom/mysqld-exporter
     container_name: mysql-exporter
     environment:
@@ -108,4 +108,4 @@ services:
     labels:
       - "mon.percona.container_type=collector"
     depends_on:
-      - mysqld
+      - mysql
