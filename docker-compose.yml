@@ -105,3 +105,17 @@ services:
       - "9104:9104"
     networks:
       - back-tier
+    restart: always
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter
+    container_name: blackbox-exporter
+    volumes:
+      - ./blackbox-exporter:/config
+    ports:
+      - "9115:9115"
+    networks:
+      - back-tier
+    restart: always
+    command:
+      - '--config.file=/config/blackbox.yml'
