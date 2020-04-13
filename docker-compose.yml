@@ -44,8 +44,6 @@ services:
     links:
       - cadvisor:cadvisor
       - alertmanager:alertmanager
-      - mysqld_exporter:mysqld_exporter
-      - blackbox-exporter
     depends_on:
       - cadvisor
     networks:
