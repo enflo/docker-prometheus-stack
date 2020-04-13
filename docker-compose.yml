@@ -44,6 +44,8 @@ services:
     links:
       - cadvisor:cadvisor
       - alertmanager:alertmanager
+      - mysqld_exporter:mysqld_exporter
+      - blackbox-exporter
     depends_on:
       - cadvisor
     networks:
@@ -102,7 +104,10 @@ services:
     environment:
       - DATA_SOURCE_NAME=prometheus:prometheus@(mysql:3306)/
     ports:
-      - "9104:9104"
+      - 9104:9104
+    depends_on:
+      - prometheus
+      - mysql
     networks:
       - back-tier
     restart: always
@@ -113,7 +118,9 @@ services:
     volumes:
       - ./blackbox-exporter:/config
     ports:
-      - "9115:9115"
+      - 9115:9115
+    depends_on:
+      - prometheus
     networks:
       - back-tier
     restart: always
