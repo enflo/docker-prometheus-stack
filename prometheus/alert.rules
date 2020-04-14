@@ -1,5 +1,5 @@
 groups:
-- name: example
+- name: local
   rules:
 
   # Alert for any instance that is unreachable for >2 minutes.
@@ -18,5 +18,5 @@ groups:
     labels:
       severity: warning
     annotations:
-      title: Low free space on {{ $labels.instance }}
-      description: On {{ $labels.instance }} device {{ $labels.device }} mounted on {{ $labels.mountpoint }} has low free space of {{ $value }}%
+      summary: "Low free space on {{ $labels.instance }}"
+      description: "On {{ $labels.instance }} device {{ $labels.device }} mounted on {{ $labels.mountpoint }} has low free space of {{ $value }}%"
