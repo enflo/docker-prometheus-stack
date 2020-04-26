@@ -15,7 +15,6 @@ networks:
     external:
       name: monitoring-ext
   back-tier:
-    driver: monitoring-lan
     internal: true
 
 services:
