@@ -62,6 +62,7 @@ services:
     depends_on:
       - cadvisor
     networks:
+      - front-tier
       - back-tier
     restart: always
 
