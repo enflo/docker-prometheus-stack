@@ -12,7 +12,6 @@ volumes:
 ###############################################################
 networks:
   front-tier:
-    driver: bridge
     external:
       name: monitoring-ext
   back-tier:
