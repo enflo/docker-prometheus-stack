@@ -136,7 +136,7 @@ groups:
       severity: error
     annotations:
       summary: "Blackbox probe HTTP failure (instance {{ $labels.instance }})"
-      description: "HTTP status code is not 200-399\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"  - alert: RedisTooManyMasters
+      description: "HTTP status code is not 200-399\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 
   - alert: BlackboxSslCertificateWillExpireSoon
     expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 30
