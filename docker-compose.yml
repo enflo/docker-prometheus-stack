@@ -1,15 +1,29 @@
 version: '3'
 
+###############################################################
+# Volumes
+###############################################################
 volumes:
     prometheus_data: {}
     grafana_data: {}
 
+###############################################################
+# Network settings
+###############################################################
 networks:
   front-tier:
+    driver: bridge
+    external:
+      name: monitoring-ext
   back-tier:
+    driver: monitoring-lan
+    internal: true
 
 services:
 
+  ###############################################################
+  # Grafana
+  ###############################################################
   grafana:
     image: grafana/grafana
     container_name: grafana
@@ -28,6 +42,9 @@ services:
       - front-tier
     restart: always
 
+  ###############################################################
+  # Prometheus
+  ###############################################################
   prometheus:
     image: prom/prometheus:v2.17.1
     container_name: prometheus
@@ -50,6 +67,9 @@ services:
       - back-tier
     restart: always
 
+  ###############################################################
+  # Internal Node exporter
+  ###############################################################
   node-exporter:
     image: prom/node-exporter
     container_name: node-exporter
@@ -68,6 +88,9 @@ services:
       - back-tier
     restart: always
 
+  ###############################################################
+  # Alert Manager
+  ###############################################################
   alertmanager:
     image: prom/alertmanager
     container_name: alertmanager
@@ -82,6 +105,9 @@ services:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
 
+  ###############################################################
+  # Local cadvisor
+  ###############################################################
   cadvisor:
     image: google/cadvisor
     container_name: cadvisor
@@ -96,6 +122,10 @@ services:
       - back-tier
     restart: always
 
+
+  ###############################################################
+  # Mysql Exporter
+  ###############################################################
   mysqld_exporter:
     image: prom/mysqld-exporter
     container_name: mysql-exporter
@@ -124,6 +154,9 @@ services:
       - back-tier
     restart: always
 
+  ###############################################################
+  # Backbox Exporter
+  ###############################################################
   blackbox-exporter:
     image: prom/blackbox-exporter
     container_name: blackbox-exporter
