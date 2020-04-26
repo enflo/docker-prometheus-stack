@@ -14,8 +14,7 @@ networks:
   front-tier:
     external:
       name: monitoring-ext
-  back-tier:
-    internal: true
+  back-tier: {}
 
 services:
 
