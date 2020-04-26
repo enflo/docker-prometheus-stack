@@ -11,9 +11,7 @@ volumes:
 # Network settings
 ###############################################################
 networks:
-  front-tier:
-    external:
-      name: monitoring-ext
+  front-tier: {}
   back-tier: {}
 
 services:

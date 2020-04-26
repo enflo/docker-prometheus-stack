@@ -55,13 +55,22 @@ scrape_configs:
   - job_name: 'mysql-exporter'
     scrape_interval: 5s
     static_configs:
-      - targets: ['51.15.112.76:9104']
+    dns_sd_configs:
+    - names:
+      - 'mysql-exporter'
+      type: 'A'
+      port: 9104
 
 
   - job_name: blackbox # To get metrics about the exporter itself
     metrics_path: /metrics
     static_configs:
-      - targets: ['51.15.112.76:9115']
+    dns_sd_configs:
+    - names:
+      - 'blackbox-exporter'
+      type: 'A'
+      port: 9115
+
 
   - job_name: 'blackbox-exporter'
     scrape_interval: 1m
@@ -79,4 +88,4 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: 51.15.112.76:9115
+        replacement: blackbox-exporter:9115
