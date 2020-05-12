@@ -1,5 +1,7 @@
 # DOCKER PROMETHEUS STACK
 
+![alt text](/docs/Docker-Prometheus-Grafana.png)
+
 ## REQUIREMENTS
  - DOCKER
  - DOCKER COMPOSE
