@@ -1,14 +1,22 @@
+global:
+  # The smarthost and SMTP sender used for mail notifications.
+  smtp_smarthost: '__SMTP_HOST__:__STMP_PORT' ## TODO CHANGE THIS FOR TRUE SMTP HOST & PORT
+  smtp_from: 'c@example.com' ## TODO CHANGE THIS FOR TRUE SMTP MAIL
+  smtp_auth_username: 'c@example.com' ## TODO CHANGE THIS FOR TRUE SMTP AUTH USER
+  smtp_auth_password: '1234' ## TODO CHANGE THIS FOR TRUE SMTP AUTH PASS
+
 route:
-  receiver: 'slack'
+  receiver: ['slack', 'email']
 
 receivers:
+#SLACK RECEIVER
   - name: 'slack'
     slack_configs:
     - send_resolved: true
       icon_url: https://avatars3.githubusercontent.com/u/3380462
       username: 'slack_alert'
-      channel: '#test'
-      api_url: 'https://hooks.slack.com/services/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'
+      channel: '#test' ## TODO CHANGE THIS FOR TRUE CHANNERL
+      api_url: '__slack_api_url__' ## TODO CHANGE THIS FOR TRUE SLACK API URL
       title: |-
             [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.instance }}
             {{- if gt (len .CommonLabels) (len .GroupLabels) -}}
@@ -31,4 +39,8 @@ receivers:
           {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
           {{ end }}
         {{ end }}
+#EMAIL RECIEVER
+  - name: 'email'
+    email_configs:
+    - to: 'a@example.com, b@example.com' ## TODO CHANGE THIS FOR TRUE RECIEVER MAILS
 

@@ -21,8 +21,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Low free space on {{ $labels.instance }}"
-      description: "On {{ $labels.instance }} device {{ $labels.device }} mounted on {{ $labels.mountpoint }} has low free space of {{ $value }}%"
+      summary: "Low free space on {{ $labels.job }}"
+      description: "On {{ $labels.job }} device {{ $labels.device }} mounted on {{ $labels.mountpoint }} has low free space of {{ $value }}%"
 
   - alert: HostMemoryUnderMemoryPressure
     expr: rate(node_vmstat_pgmajfault[1m]) > 1000
@@ -30,7 +30,7 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host memory under memory pressure (instance {{ $labels.instance }})"
+      summary: "Host memory under memory pressure (instance {{ $labels.job }})"
       description: "The node is under heavy memory pressure. High rate of major page faults\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 
   - alert: HostUnusualNetworkThroughputIn
@@ -39,7 +39,7 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host unusual network throughput in (instance {{ $labels.instance }})"
+      summary: "Host unusual network throughput in (instance {{ $labels.job }})"
       description: "Host network interfaces are probably receiving too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 
   - alert: HostUnusualNetworkThroughputOut
@@ -48,7 +48,7 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host unusual network throughput out (instance {{ $labels.instance }})"
+      summary: "Host unusual network throughput out (instance {{ $labels.job }})"
       description: "Host network interfaces are probably sending too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 
   - alert: HostHighCpuLoad
@@ -57,7 +57,7 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host high CPU load (instance {{ $labels.instance }})"
+      summary: "Host high CPU load (instance {{ $labels.job }})"
       description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 
   - alert: HostSystemdServiceCrashed
@@ -66,7 +66,7 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host SystemD service crashed (instance {{ $labels.instance }})"
+      summary: "Host SystemD service crashed (instance {{ $labels.job }})"
       description: "SystemD service crashed\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 
   #- alert: HostOutOfMemory
@@ -75,38 +75,8 @@ groups:
   #    labels:
   #      severity: warning
   #    annotations:
-  #      summary: "Host out of memory (instance {{ $labels.instance }})"
+  #      summary: "Host out of memory (instance {{ $labels.job }})"
   #      description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-
-  ###############################################################
-  # cAdvisor status
-  ###############################################################
-  - alert: ContainerKilled
-    expr: time() - container_last_seen > 60
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "Container killed (instance {{ $labels.instance }})"
-      description: "A container has disappeared\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-
-  - alert: ContainerMemoryUsage
-    expr: (sum(container_memory_usage_bytes) BY (instance, name) / sum(container_spec_memory_limit_bytes) BY (instance, name) * 100) > 80
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "Container Memory usage (instance {{ $labels.instance }})"
-      description: "Container Memory usage is above 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-
-  - alert: ContainerVolumeUsage
-    expr: (1 - (sum(container_fs_inodes_free) BY (instance) / sum(container_fs_inodes_total) BY (instance)) * 100) > 80
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "Container Volume usage (instance {{ $labels.instance }})"
-      description: "Container Volume usage is above 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 
   ###############################################################
   # blackbox exporter status
@@ -164,42 +134,3 @@ groups:
     annotations:
       summary: "Blackbox SSL certificate expired (instance {{ $labels.instance }})"
       description: "SSL certificate has expired already\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-
-  ###############################################################
-  # mysql exporter status
-  ###############################################################
-  - alert: MysqlDown
-    expr: mysql_up == 0
-    for: 5m
-    labels:
-      severity: error
-    annotations:
-      summary: "MySQL down (instance {{ $labels.instance }})"
-      description: "MySQL instance is down on {{ $labels.instance }}\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-
-  - alert: MysqlTooManyConnections
-    expr: avg by (instance) (max_over_time(mysql_global_status_threads_connected[5m])) / avg by (instance) (mysql_global_variables_max_connections) * 100 > 80
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "MySQL too many connections (instance {{ $labels.instance }})"
-      description: "More than 80% of MySQL connections are in use on {{ $labels.instance }}\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-
-  - alert: MysqlHighThreadsRunning
-    expr: avg by (instance) (max_over_time(mysql_global_status_threads_running[5m])) / avg by (instance) (mysql_global_variables_max_connections) * 100 > 60
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "MySQL high threads running (instance {{ $labels.instance }})"
-      description: "More than 60% of MySQL connections are in running state on {{ $labels.instance }}\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-
-  - alert: MysqlRestarted
-    expr: mysql_global_status_uptime < 60
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "MySQL restarted (instance {{ $labels.instance }})"
-      description: "MySQL has just been restarted, less than one minute ago on {{ $labels.instance }}.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"

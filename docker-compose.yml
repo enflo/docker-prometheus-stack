@@ -11,10 +11,43 @@ volumes:
 # Network settings
 ###############################################################
 networks:
-  front-tier: {}
+  front-tier:
+    external: true
   back-tier: {}
 
 services:
+  ###############################################################
+  # NGINX
+  ###############################################################
+  nginx:
+    container_name: nginx
+    image: nginx-local
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - front-tier
+      - back-tier
+    links:
+      - grafana:grafana
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    volumes:
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+      - ./nginx/.htpasswd:/etc/nginx/conf.d/.htpasswd
+      - ./nginx/grafana.conf:/etc/nginx/conf.d/grafana.conf
+      - ./nginx/prometheus.conf:/etc/nginx/conf.d/prometheus.conf
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    restart: unless-stopped
+    volumes:
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
 
   ###############################################################
   # Grafana
@@ -25,8 +58,6 @@ services:
     user: "104"
     depends_on:
       - prometheus
-    ports:
-      - 3000:3000
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
@@ -34,7 +65,6 @@ services:
       - ./grafana/config.monitoring
     networks:
       - back-tier
-      - front-tier
     restart: always
 
   ###############################################################
@@ -59,7 +89,6 @@ services:
     depends_on:
       - cadvisor
     networks:
-      - front-tier
       - back-tier
     restart: always
 
@@ -126,7 +155,7 @@ services:
     image: prom/mysqld-exporter
     container_name: mysql-exporter
     environment:
-      - DATA_SOURCE_NAME=root:prometheus@(51.15.112.76:3306)/
+      - DATA_SOURCE_NAME=root:prometheus@(localhost:3306)/ ##TODO Change to a DB mysql connection
     command:
       - '--collect.global_status'
       - '--collect.global_variables'

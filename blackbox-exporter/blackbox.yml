@@ -7,4 +7,8 @@ modules:
       valid_status_codes: [200,202,204,301,302]
       no_follow_redirects: false
       preferred_ip_protocol: "ip4"
+      fail_if_ssl: false
+      fail_if_not_ssl: true
       method: GET
+      tls_config:
+        insecure_skip_verify: false
