@@ -33,6 +33,7 @@
 ## MANAGE
 
 If you edit the configuration once the cluster is started, you have to restart the containers.
+
     ```bash
         docker-compose down  CONTAINER_NAME &&  docker-compose up -d CONTAINER_NAME
     ```
