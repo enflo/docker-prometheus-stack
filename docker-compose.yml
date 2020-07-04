@@ -53,7 +53,7 @@ services:
   # Grafana
   ###############################################################
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:7.0.5
     container_name: grafana
     user: "104"
     depends_on:
@@ -71,7 +71,7 @@ services:
   # Prometheus
   ###############################################################
   prometheus:
-    image: prom/prometheus:v2.17.1
+    image: prom/prometheus:v2.19.2
     container_name: prometheus
     volumes:
       - ./prometheus/:/etc/prometheus/
@@ -196,3 +196,24 @@ services:
     restart: always
     command:
       - '--config.file=/config/blackbox.yml'
+
+  ###############################################################
+  # Grafana Loki & promtail
+  ###############################################################
+  loki:
+    image: grafana/loki:1.5.0
+    container_name: loki
+    volumes:
+      - ./grafana/loki/config.yaml:/etc/loki/local-config.yaml
+    command: --config.file=/etc/loki/local-config.yaml
+    networks:
+      - back-tier
+
+  promtail:
+    image: grafana/promtail:1.5.0
+    container_name: promtail
+    volumes:
+      - /var/log:/var/log
+    command: --config.file=/etc/promtail/docker-config.yaml
+    networks:
+      - back-tier
