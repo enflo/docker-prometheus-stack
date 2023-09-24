@@ -205,22 +205,59 @@ services:
   # Grafana Loki & promtail
   ###############################################################
   loki:
-    image: grafana/loki
-    container_name: loki
+    image: grafana/loki:latest
     volumes:
-      - ./grafana/loki/config.yaml:/etc/loki/local-config.yaml
-    command: --config.file=/etc/loki/local-config.yaml
+      - ./grafana/loki/loki-config.yaml:/etc/config/loki.yaml
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/config/loki.yaml
+    links:
+      - promtail:promtail
+      - minio:minio
+    depends_on:
+      - minio
     networks:
+      - front-tier
       - back-tier
 
   promtail:
-    image: grafana/promtail
-    container_name: promtail
+    image: grafana/promtail:2.6.1
     volumes:
       - /var/log:/var/log
-    command: --config.file=/etc/promtail/docker-config.yaml
+      - ./grafana/promtail-local-config.yaml:/etc/promtail/config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yaml
     networks:
       - back-tier
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - loki
+    command: server ~ --address ':9000' --console-address ':9001'
+    volumes:
+      - ./grafana/minio/minio:/data
+    networks:
+      - back-tier
+
+  createbuckets:
+      image: minio/mc
+      networks:
+        - back-tier
+      depends_on:
+        - minio
+      entrypoint: >
+        /bin/sh -c "
+        /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
+        /usr/bin/mc rm -r --force myminio/loki;
+        /usr/bin/mc mb myminio/loki;
+        /usr/bin/mc policy set public myminio/loki;
+        exit 0;
+        "
       
   ###############################################################
   # Prometheus Alert Manager MS TEAMS

@@ -102,3 +102,14 @@ scrape_configs:
       regex: '.*'
       target_label: instance
       replacement: 'TEST' ##TODO Change
+
+  - job_name: 'mongo-expoter'
+    static_configs:
+    - targets: ['localhost:9216']
+      labels:
+        service: 'mongo'
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: '.*'
+      target_label: instance
+      replacement: 'mongo-expotero'
